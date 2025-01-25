@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
+
 import S3 from "aws-sdk/clients/s3";
 import sharp from "sharp";
 
@@ -9,7 +9,7 @@ import { ImageHandler } from "../../image-handler";
 import { ImageEdits, StatusCodes } from "../../lib";
 
 const s3Client = new S3();
-const rekognitionClient = new Rekognition();
+const imageHandler = new ImageHandler(s3Client);
 
 
 // base64 encoded images
@@ -29,7 +29,7 @@ describe("crop", () => {
 
     // Act
     try {
-      const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+      const imageHandler = new ImageHandler(s3Client);
       await imageHandler.applyEdits(image, edits, false);
     } catch (error) {
       // Assert
@@ -52,7 +52,7 @@ describe("crop", () => {
     };
 
     // crop an image and compare with the result expected
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+    const imageHandler = new ImageHandler(s3Client);
     const result = await imageHandler.applyEdits(image, edits, false);
     const resultBuffer = await result.toBuffer();
     expect(resultBuffer).toEqual(Buffer.from(image_png_white_1x1, "base64"));
@@ -71,7 +71,7 @@ describe("crop", () => {
 
     // crop an image and compare with the result expected
     try {
-      const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+      const imageHandler = new ImageHandler(s3Client);
       await imageHandler.applyEdits(image, edits, false);
     } catch (error) {
       // Assert

@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { RequestTypes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 describe("parseImageHeaders", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
 
   it("001/Should return headers if headers are provided for a sample base64-encoded image request", () => {
     // Arrange
@@ -20,7 +16,7 @@ describe("parseImageHeaders", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageHeaders(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -43,7 +39,7 @@ describe("parseImageHeaders", () => {
       path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiaGVhZGVycyI6eyJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0zMTUzNjAwMCxwdWJsaWMiLCAiVHJhbnNmZXItZW5jb2RpbmciOiAidmFsdWUiLCAieC1hcGkta2V5IjogInZhbHVlIiwgIngtYW16LWhlYWRlciI6ICJ2YWx1ZSIsICJjb250ZW50LXR5cGUiOiAiaHRtbCIsICJBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW4iOiAiKiJ9LCJvdXRwdXRGb3JtYXQiOiJqcGVnIn0=",
     };
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageHeaders(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -60,7 +56,7 @@ describe("parseImageHeaders", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageHeaders(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -72,7 +68,7 @@ describe("parseImageHeaders", () => {
     const event = { path: "/test.jpg" };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageHeaders(event, RequestTypes.THUMBOR);
 
     // Assert

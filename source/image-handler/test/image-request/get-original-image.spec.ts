@@ -4,16 +4,12 @@
 import { mockAwsS3 } from "../mock";
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { ImageHandlerError, StatusCodes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 describe("getOriginalImage", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -32,7 +28,7 @@ describe("getOriginalImage", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = await imageRequest.getOriginalImage("validBucket", "validKey");
 
     // Assert
@@ -52,7 +48,7 @@ describe("getOriginalImage", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -75,7 +71,7 @@ describe("getOriginalImage", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -100,7 +96,7 @@ describe("getOriginalImage", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -138,7 +134,7 @@ describe("getOriginalImage", () => {
       }));
 
       // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const imageRequest = new ImageRequest(s3Client);
       const result = await imageRequest.getOriginalImage("validBucket", "validKey");
 
       // Assert

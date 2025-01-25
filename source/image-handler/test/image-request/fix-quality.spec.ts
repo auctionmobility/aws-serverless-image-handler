@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { ImageFormatTypes, ImageRequestInfo, RequestTypes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 const imageRequestInfo: ImageRequestInfo = {
   bucket: "bucket",
@@ -19,9 +17,6 @@ const imageRequestInfo: ImageRequestInfo = {
 
 describe("fixQuality", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
-
   beforeEach(() => {
     jest.clearAllMocks();
     imageRequestInfo.edits = { png: { quality: 80 } };
@@ -29,7 +24,7 @@ describe("fixQuality", () => {
 
   it("Should map correct edits with quality key to edits if output in edits differs from output format in request ", () => {
     // Arrange
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["fixQuality"](imageRequestInfo);
@@ -41,7 +36,7 @@ describe("fixQuality", () => {
 
   it("should not map edits with quality key if not output format is not a supported type", () => {
     // Arrange
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     imageRequestInfo.outputFormat = "pdf" as ImageFormatTypes;
 
     // Act
@@ -53,7 +48,7 @@ describe("fixQuality", () => {
 
   it("should not map edits with quality key if not output format is the same as the quality key", () => {
     // Arrange
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     imageRequestInfo.outputFormat = ImageFormatTypes.PNG;
 
     // Act
@@ -65,7 +60,7 @@ describe("fixQuality", () => {
 
   it("should not map edits with quality key if the request is of default type", () => {
     // Arrange
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     imageRequestInfo.outputFormat = ImageFormatTypes.JPEG;
     imageRequestInfo.requestType = RequestTypes.DEFAULT;
 
@@ -78,7 +73,7 @@ describe("fixQuality", () => {
 
   it("should not map edits with quality key if the request is default type", () => {
     // Arrange
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     imageRequestInfo.outputFormat = ImageFormatTypes.JPEG;
     imageRequestInfo.requestType = RequestTypes.DEFAULT;
 
@@ -91,7 +86,7 @@ describe("fixQuality", () => {
 
   it("should not map edits with quality key if the request if there is no output format", () => {
     // Arrange
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     delete imageRequestInfo.outputFormat;
 
     // Act

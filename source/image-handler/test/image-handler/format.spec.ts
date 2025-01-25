@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
+
 import S3 from "aws-sdk/clients/s3";
 import sharp from "sharp";
 import fs from "fs";
@@ -10,7 +10,7 @@ import { ImageHandler } from "../../image-handler";
 import { ImageFormatTypes, ImageRequestInfo, RequestTypes } from "../../lib";
 
 const s3Client = new S3();
-const rekognitionClient = new Rekognition();
+const imageHandler = new ImageHandler(s3Client);
 const image = fs.readFileSync("./test/image/25x15.png");
 
 describe("format", () => {
@@ -29,7 +29,6 @@ describe("format", () => {
     };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.process(request);
 
     // Assert
@@ -52,7 +51,6 @@ describe("format", () => {
     jest.spyOn(sharp(), "webp");
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.process(request);
 
     // Assert
@@ -73,7 +71,6 @@ describe("format", () => {
     };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.process(request);
 
     // Assert
@@ -96,7 +93,6 @@ describe("modifyImageOutput", () => {
       outputFormat: ImageFormatTypes.JPEG,
       originalImage: image,
     };
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const sharpImage = sharp(request.originalImage, { failOnError: false }).withMetadata();
     const toFormatSpy = jest.spyOn(sharp.prototype, "toFormat");
     const result = await imageHandler["modifyImageOutput"](sharpImage, request).toBuffer();
@@ -119,7 +115,6 @@ describe("modifyImageOutput", () => {
       originalImage: image,
     };
     const sharpImage = sharp(request.originalImage, { failOnError: false }).withMetadata();
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
 
     // Act
     const result = await imageHandler["modifyImageOutput"](sharpImage, request).toBuffer();
@@ -141,7 +136,6 @@ describe("modifyImageOutput", () => {
       originalImage: image,
     };
     const sharpImage = sharp(request.originalImage, { failOnError: false }).withMetadata();
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const webpSpy = jest.spyOn(sharp.prototype, "webp");
 
     // Act

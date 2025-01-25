@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
-import { SecretProvider } from "../../secret-provider";
 
 describe("inferImageType", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
 
   test.each([
     { value: "FFD8FFDB", type: "image/jpeg" },
@@ -31,7 +27,7 @@ describe("inferImageType", () => {
     const imageBuffer = Buffer.from(byteValues.concat(new Array(8).fill(0x00)));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.inferImageType(imageBuffer);
 
     // Assert
@@ -44,7 +40,7 @@ describe("inferImageType", () => {
 
     try {
       // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const imageRequest = new ImageRequest(s3Client);
       imageRequest.inferImageType(imageBuffer);
     } catch (error) {
       // Assert

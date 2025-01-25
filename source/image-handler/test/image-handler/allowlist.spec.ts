@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
 import S3 from "aws-sdk/clients/s3";
 import sharp from "sharp";
 
@@ -10,7 +9,6 @@ import { ImageRequestInfo, RequestTypes } from "../../lib";
 import fs from "fs";
 
 const s3Client = new S3();
-const rekognitionClient = new Rekognition();
 
 describe("allowlist", () => {
   it("Non-allowlisted filters should not be called", async () => {
@@ -28,7 +26,7 @@ describe("allowlist", () => {
     const rotateSpy = jest.spyOn(sharp.prototype, "rotate");
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+    const imageHandler = new ImageHandler(s3Client);
     await imageHandler.process(request);
 
     // Assert

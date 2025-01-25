@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { StatusCodes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 describe("decodeRequest", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
 
   it("Should pass if a valid base64-encoded path has been specified", () => {
     // Arrange
@@ -20,7 +16,7 @@ describe("decodeRequest", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.decodeRequest(event);
 
     // Assert
@@ -36,7 +32,7 @@ describe("decodeRequest", () => {
     const event = { path: "/someNonBase64EncodedContentHere" };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -56,7 +52,7 @@ describe("decodeRequest", () => {
     const event = {};
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {

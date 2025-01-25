@@ -53,14 +53,6 @@ export interface ImageRequestInfo {
   effort?: number;
 }
 
-export interface RekognitionCompatibleImage {
-  imageBuffer: {
-    data: Buffer;
-    info: sharp.OutputInfo;
-  };
-  format: keyof sharp.FormatEnum;
-}
-
 export interface ImageHandlerExecutionResult {
   statusCode: StatusCodes;
   isBase64Encoded: boolean;

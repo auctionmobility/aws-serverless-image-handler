@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { ImageHandlerEvent, ImageFormatTypes, ImageRequestInfo, RequestTypes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 const request: Record<string, any> = {
   bucket: "bucket",
@@ -26,8 +24,6 @@ const createEvent = (request): ImageHandlerEvent => {
 
 describe("determineOutputFormat", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
 
   it("Should map edits.toFormat to outputFormat in image request", () => {
     // Arrange
@@ -38,7 +34,7 @@ describe("determineOutputFormat", () => {
       edits: { toFormat: ImageFormatTypes.PNG },
       originalImage: Buffer.from("image"),
     };
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["determineOutputFormat"](imageRequestInfo, createEvent(request));
@@ -56,7 +52,7 @@ describe("determineOutputFormat", () => {
       originalImage: Buffer.from("image"),
     };
     request.outputFormat = ImageFormatTypes.PNG;
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["determineOutputFormat"](imageRequestInfo, createEvent(request));
@@ -75,7 +71,7 @@ describe("determineOutputFormat", () => {
     };
     request.outputFormat = ImageFormatTypes.WEBP;
     request.effort = 3;
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["determineOutputFormat"](imageRequestInfo, createEvent(request));
@@ -95,7 +91,7 @@ describe("determineOutputFormat", () => {
     };
     request.outputFormat = ImageFormatTypes.WEBP;
     request.effort = "invalid";
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["determineOutputFormat"](imageRequestInfo, createEvent(request));
@@ -115,7 +111,7 @@ describe("determineOutputFormat", () => {
     };
     request.outputFormat = ImageFormatTypes.WEBP;
     request.effort = 7;
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["determineOutputFormat"](imageRequestInfo, createEvent(request));
@@ -135,7 +131,7 @@ describe("determineOutputFormat", () => {
     };
     request.outputFormat = ImageFormatTypes.WEBP;
     request.effort = -1;
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["determineOutputFormat"](imageRequestInfo, createEvent(request));
@@ -155,7 +151,7 @@ describe("determineOutputFormat", () => {
     };
     request.outputFormat = ImageFormatTypes.WEBP;
     request.effort = 2.378;
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Act
     imageRequest["determineOutputFormat"](imageRequestInfo, createEvent(request));

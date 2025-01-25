@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { RequestTypes, StatusCodes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 describe("parseImageEdits", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
   const OLD_ENV = process.env;
 
   beforeEach(() => {
@@ -29,7 +25,7 @@ describe("parseImageEdits", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageEdits(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -44,7 +40,7 @@ describe("parseImageEdits", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageEdits(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -64,7 +60,7 @@ describe("parseImageEdits", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageEdits(event, RequestTypes.CUSTOM);
 
     // Assert
@@ -79,7 +75,7 @@ describe("parseImageEdits", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import { createHmac } from "crypto";
 
 import {
   ContentTypes,
@@ -17,7 +16,6 @@ import {
   StatusCodes,
   HEADER_DENY_LIST,
 } from "./lib";
-import { SecretProvider } from "./secret-provider";
 import { ThumborMapper } from "./thumbor-mapper";
 
 type OriginalImageInfo = Partial<{
@@ -31,7 +29,7 @@ type OriginalImageInfo = Partial<{
 export class ImageRequest {
   private static readonly DEFAULT_EFFORT = 4;
 
-  constructor(private readonly s3Client: S3, private readonly secretProvider: SecretProvider) {}
+  constructor(private readonly s3Client: S3) {}
 
   /**
    * Determines the output format of an image
@@ -97,7 +95,11 @@ export class ImageRequest {
    */
   public async setup(event: ImageHandlerEvent): Promise<ImageRequestInfo> {
     try {
-      await this.validateRequestSignature(event);
+      const { ENABLE_SIGNATURE } = process.env;
+      
+      if (ENABLE_SIGNATURE === "Yes") {
+        throw new Error("Signature verification is no longer supported");
+      }
 
       let imageRequestInfo: ImageRequestInfo = <ImageRequestInfo>{};
 
@@ -478,52 +480,6 @@ export class ImageRequest {
       "RequestTypeError",
       "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg/jpeg, png, tiff, webp, gif, avif). Inferring the image type from hex headers is not available for SVG images. Refer to the documentation for additional guidance on forming image requests."
     );
-  }
-
-  /**
-   * Validates the request's signature.
-   * @param event Lambda request body.
-   * @returns A promise.
-   * @throws Throws the error if validation is enabled and the provided signature is invalid.
-   */
-  private async validateRequestSignature(event: ImageHandlerEvent): Promise<void> {
-    const { ENABLE_SIGNATURE, SECRETS_MANAGER, SECRET_KEY } = process.env;
-
-    // Checks signature enabled
-    if (ENABLE_SIGNATURE === "Yes") {
-      const { path, queryStringParameters } = event;
-
-      if (!queryStringParameters?.signature) {
-        throw new ImageHandlerError(
-          StatusCodes.BAD_REQUEST,
-          "AuthorizationQueryParametersError",
-          "Query-string requires the signature parameter."
-        );
-      }
-
-      try {
-        const { signature } = queryStringParameters;
-        const secret = JSON.parse(await this.secretProvider.getSecret(SECRETS_MANAGER));
-        const key = secret[SECRET_KEY];
-        const hash = createHmac("sha256", key).update(path).digest("hex");
-
-        // Signature should be made with the full path.
-        if (signature !== hash) {
-          throw new ImageHandlerError(StatusCodes.FORBIDDEN, "SignatureDoesNotMatch", "Signature does not match.");
-        }
-      } catch (error) {
-        if (error.code === "SignatureDoesNotMatch") {
-          throw error;
-        }
-
-        console.error("Error occurred while checking signature.", error);
-        throw new ImageHandlerError(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "SignatureValidationFailure",
-          "Signature validation failed."
-        );
-      }
-    }
   }
 }
 

@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
 import S3 from "aws-sdk/clients/s3";
 import fs from "fs";
 import sharp from "sharp";
@@ -10,7 +9,7 @@ import { ImageHandler } from "../../image-handler";
 import { ImageRequestInfo, RequestTypes } from "../../lib";
 
 const s3Client = new S3();
-const rekognitionClient = new Rekognition();
+const imageHandler = new ImageHandler(s3Client);
 
 describe("rotate", () => {
   it("Should pass if rotate is null and return image without EXIF and ICC", async () => {
@@ -25,7 +24,6 @@ describe("rotate", () => {
     };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.process(request);
 
     // Assert
@@ -47,7 +45,6 @@ describe("rotate", () => {
     };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.process(request);
 
     // Assert
@@ -71,7 +68,6 @@ describe("rotate", () => {
     };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.process(request);
 
     // Assert
