@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
 import S3 from "aws-sdk/clients/s3";
 import sharp from "sharp";
 
@@ -10,7 +9,7 @@ import { ImageEdits, ImageRequestInfo, RequestTypes } from "../../lib";
 import fs from "fs";
 
 const s3Client = new S3();
-const rekognitionClient = new Rekognition();
+const imageHandler = new ImageHandler(s3Client);
 const image = fs.readFileSync("./test/image/25x15.png");
 const withMetatdataSpy = jest.spyOn(sharp.prototype, "withMetadata");
 
@@ -25,7 +24,7 @@ describe("standard", () => {
     const edits: ImageEdits = { grayscale: true, flip: true };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+    const imageHandler = new ImageHandler(s3Client);
     const result = await imageHandler.applyEdits(image, edits, false);
 
     // Assert
@@ -49,7 +48,7 @@ describe("standard", () => {
     };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+    const imageHandler = new ImageHandler(s3Client);
     const result = await imageHandler.process(request);
 
     // Assert
@@ -68,7 +67,7 @@ describe("instantiateSharpImage", () => {
       rotate: null,
     };
     const options = { faiOnError: false };
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+    const imageHandler = new ImageHandler(s3Client);
 
     // Act
     await imageHandler["instantiateSharpImage"](image, edits, options);
@@ -83,7 +82,7 @@ describe("instantiateSharpImage", () => {
       rotate: undefined,
     };
     const options = { faiOnError: false };
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+    const imageHandler = new ImageHandler(s3Client);
 
     // Act
     await imageHandler["instantiateSharpImage"](image, edits, options);
@@ -100,7 +99,7 @@ describe("instantiateSharpImage", () => {
     };
     const options = { faiOnError: false };
     const modifiedImage = await sharp(image).withMetadata({ orientation: 1 }).toBuffer();
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+    const imageHandler = new ImageHandler(s3Client);
 
     // Act
     await imageHandler["instantiateSharpImage"](modifiedImage, edits, options);

@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { RequestTypes, StatusCodes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 describe("parseImageKey", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
   const OLD_ENV = process.env;
 
   beforeEach(() => {
@@ -29,7 +25,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -43,7 +39,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -59,7 +55,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -74,7 +70,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -89,7 +85,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR, "some-test-bucket");
 
     // Assert
@@ -104,7 +100,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR, "some-other-bucket");
 
     // Assert
@@ -119,7 +115,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -134,7 +130,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -149,7 +145,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -164,7 +160,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -179,7 +175,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -194,7 +190,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -209,7 +205,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -222,7 +218,7 @@ describe("parseImageKey", () => {
     const event = { path: "/100x100/test-100x100/test/beach-100x100.jpg" };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -242,7 +238,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.CUSTOM);
 
     // Assert
@@ -262,7 +258,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.CUSTOM);
 
     // Assert
@@ -277,7 +273,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -299,7 +295,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -314,7 +310,7 @@ describe("parseImageKey", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageKey(event, RequestTypes.THUMBOR);
 
     // Assert

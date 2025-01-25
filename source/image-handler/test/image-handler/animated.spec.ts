@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
+
 import S3 from "aws-sdk/clients/s3";
 import fs from "fs";
 
@@ -9,7 +9,7 @@ import { ImageHandler } from "../../image-handler";
 import { ContentTypes, ImageRequestInfo, RequestTypes } from "../../lib";
 
 const s3Client = new S3();
-const rekognitionClient = new Rekognition();
+const imageHandler = new ImageHandler(s3Client);
 const image = fs.readFileSync("./test/image/25x15.png");
 const gifImage = fs.readFileSync("./test/image/transparent-5x5-2page.gif");
 
@@ -30,7 +30,7 @@ describe("animated", () => {
         };
 
         // Act
-        const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+        const imageHandler = new ImageHandler(s3Client);
         // SpyOn InstantiateSharpImage
         const instantiateSpy = jest.spyOn<any, 'instantiateSharpImage'>(imageHandler, "instantiateSharpImage");
         await imageHandler.process(request);
@@ -51,7 +51,7 @@ describe("animated", () => {
         };
 
         // Act
-        const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+        const imageHandler = new ImageHandler(s3Client);
         // SpyOn InstantiateSharpImage
         const instantiateSpy = jest.spyOn<any, 'instantiateSharpImage'>(imageHandler, "instantiateSharpImage");
         await imageHandler.process(request);
@@ -73,7 +73,7 @@ describe("animated", () => {
         };
 
         // Act
-        const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+        const imageHandler = new ImageHandler(s3Client);
         // SpyOn InstantiateSharpImage
         const instantiateSpy = jest.spyOn<any, 'instantiateSharpImage'>(imageHandler, "instantiateSharpImage");
         await imageHandler.process(request);
@@ -94,7 +94,7 @@ describe("animated", () => {
         };
 
         // Act
-        const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+        const imageHandler = new ImageHandler(s3Client);
         // SpyOn InstantiateSharpImage
         const instantiateSpy = jest.spyOn<any, 'instantiateSharpImage'>(imageHandler, "instantiateSharpImage");
         await imageHandler.process(request);
@@ -115,7 +115,7 @@ describe("animated", () => {
         };
 
         // Act
-        const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+        const imageHandler = new ImageHandler(s3Client);
         // SpyOn InstantiateSharpImage
         const instantiateSpy = jest.spyOn<any, 'instantiateSharpImage'>(imageHandler, "instantiateSharpImage");
         await imageHandler.process(request);
@@ -136,7 +136,7 @@ describe("animated", () => {
         };
 
         // Act
-        const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+        const imageHandler = new ImageHandler(s3Client);
         // SpyOn InstantiateSharpImage
         const instantiateSpy = jest.spyOn<any, 'instantiateSharpImage'>(imageHandler, "instantiateSharpImage");
         await imageHandler.process(request);
@@ -157,7 +157,7 @@ describe("animated", () => {
         };
 
         // Act
-        const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+        const imageHandler = new ImageHandler(s3Client);
         // SpyOn InstantiateSharpImage
         const instantiateSpy = jest.spyOn<any, 'instantiateSharpImage'>(imageHandler, "instantiateSharpImage");
         await imageHandler.process(request);

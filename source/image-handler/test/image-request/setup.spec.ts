@@ -1,20 +1,16 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import { mockAwsS3, mockAwsSecretManager } from "../mock";
+import { mockAwsS3 } from "../mock";
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { ImageHandlerError, RequestTypes, StatusCodes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 describe("setup", () => {
   const OLD_ENV = process.env;
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  let secretProvider = new SecretProvider(secretsManager);
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -23,7 +19,6 @@ describe("setup", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    secretProvider = new SecretProvider(secretsManager); // need to re-create the provider to make sure the secret is not cached
     process.env = OLD_ENV;
   });
 
@@ -42,7 +37,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -78,7 +73,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -113,7 +108,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -146,7 +141,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Thumbor",
@@ -181,7 +176,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Thumbor",
@@ -230,7 +225,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: RequestTypes.CUSTOM,
@@ -280,7 +275,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: RequestTypes.CUSTOM,
@@ -313,7 +308,7 @@ describe("setup", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -321,178 +316,6 @@ describe("setup", () => {
     } catch (error) {
       expect(error.code).toEqual("ImageBucket::CannotAccessBucket");
     }
-  });
-
-  describe("enableSignature", () => {
-    beforeAll(() => {
-      process.env.ENABLE_SIGNATURE = "Yes";
-      process.env.SECRETS_MANAGER = "serverless-image-handler";
-      process.env.SECRET_KEY = "signatureKey";
-      process.env.SOURCE_BUCKETS = "validBucket";
-    });
-
-    it("Should pass when the image signature is correct", async () => {
-      // Arrange
-      const event = {
-        path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiZWRpdHMiOnsidG9Gb3JtYXQiOiJwbmcifX0=",
-        queryStringParameters: {
-          signature: "4d41311006641a56de7bca8abdbda91af254506107a2c7b338a13ca2fa95eac3",
-        },
-      };
-
-      // Mock
-      mockAwsS3.getObject.mockImplementationOnce(() => ({
-        promise() {
-          return Promise.resolve({ Body: Buffer.from("SampleImageContent\n") });
-        },
-      }));
-      mockAwsSecretManager.getSecretValue.mockImplementationOnce(() => ({
-        promise() {
-          return Promise.resolve({
-            SecretString: JSON.stringify({
-              [process.env.SECRET_KEY]: "secret",
-            }),
-          });
-        },
-      }));
-
-      // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
-      const imageRequestInfo = await imageRequest.setup(event);
-      const expectedResult = {
-        requestType: "Default",
-        bucket: "validBucket",
-        key: "validKey",
-        edits: { toFormat: "png" },
-        outputFormat: "png",
-        originalImage: Buffer.from("SampleImageContent\n"),
-        cacheControl: "max-age=31536000,public",
-        contentType: "image/png",
-      };
-
-      // Assert
-      expect(mockAwsS3.getObject).toHaveBeenCalledWith({
-        Bucket: "validBucket",
-        Key: "validKey",
-      });
-      expect(mockAwsSecretManager.getSecretValue).toHaveBeenCalledWith({
-        SecretId: process.env.SECRETS_MANAGER,
-      });
-      expect(imageRequestInfo).toEqual(expectedResult);
-    });
-
-    it("Should throw an error when queryStringParameters are missing", async () => {
-      // Arrange
-      const event = {
-        path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiZWRpdHMiOnsidG9Gb3JtYXQiOiJwbmcifX0=",
-      };
-
-      // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
-      try {
-        await imageRequest.setup(event);
-      } catch (error) {
-        // Assert
-        expect(error).toMatchObject({
-          status: StatusCodes.BAD_REQUEST,
-          code: "AuthorizationQueryParametersError",
-          message: "Query-string requires the signature parameter.",
-        });
-      }
-    });
-
-    it("Should throw an error when the image signature query parameter is missing", async () => {
-      // Arrange
-      const event = {
-        path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiZWRpdHMiOnsidG9Gb3JtYXQiOiJwbmcifX0=",
-        queryStringParameters: null,
-      };
-
-      // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
-      try {
-        await imageRequest.setup(event);
-      } catch (error) {
-        // Assert
-        expect(error).toMatchObject({
-          status: StatusCodes.BAD_REQUEST,
-          message: "Query-string requires the signature parameter.",
-          code: "AuthorizationQueryParametersError",
-        });
-      }
-    });
-
-    it("Should throw an error when signature does not match", async () => {
-      // Arrange
-      const event = {
-        path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiZWRpdHMiOnsidG9Gb3JtYXQiOiJwbmcifX0=",
-        queryStringParameters: {
-          signature: "invalid",
-        },
-      };
-
-      // Mock
-      mockAwsSecretManager.getSecretValue.mockImplementationOnce(() => ({
-        promise() {
-          return Promise.resolve({
-            SecretString: JSON.stringify({
-              [process.env.SECRET_KEY]: "secret",
-            }),
-          });
-        },
-      }));
-
-      // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
-      try {
-        await imageRequest.setup(event);
-      } catch (error) {
-        // Assert
-        expect(mockAwsSecretManager.getSecretValue).toHaveBeenCalledWith({
-          SecretId: process.env.SECRETS_MANAGER,
-        });
-        expect(error).toMatchObject({
-          status: 403,
-          message: "Signature does not match.",
-          code: "SignatureDoesNotMatch",
-        });
-      }
-    });
-
-    it("Should throw an error when any other error occurs", async () => {
-      // Arrange
-      const event = {
-        path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiZWRpdHMiOnsidG9Gb3JtYXQiOiJwbmcifX0=",
-        queryStringParameters: {
-          signature: "4d41311006641a56de7bca8abdbda91af254506107a2c7b338a13ca2fa95eac3",
-        },
-      };
-
-      // Mock
-      mockAwsSecretManager.getSecretValue.mockImplementationOnce(() => ({
-        promise() {
-          return Promise.reject(
-            new ImageHandlerError(StatusCodes.INTERNAL_SERVER_ERROR, "InternalServerError", "SimulatedError")
-          );
-        },
-      }));
-
-      // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
-      try {
-        await imageRequest.setup(event);
-      } catch (error) {
-        // Assert
-        expect(mockAwsSecretManager.getSecretValue).toHaveBeenCalledWith({
-          SecretId: process.env.SECRETS_MANAGER,
-        });
-        expect(error).toMatchObject({
-          status: StatusCodes.INTERNAL_SERVER_ERROR,
-          message: "Signature validation failed.",
-          code: "SignatureValidationFailure",
-        });
-      }
-    });
   });
 
   describe("SVGSupport", () => {
@@ -518,7 +341,7 @@ describe("setup", () => {
       }));
 
       // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const imageRequest = new ImageRequest(s3Client);
       const imageRequestInfo = await imageRequest.setup(event);
       const expectedResult = {
         requestType: "Thumbor",
@@ -555,7 +378,7 @@ describe("setup", () => {
       }));
 
       // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const imageRequest = new ImageRequest(s3Client);
       const imageRequestInfo = await imageRequest.setup(event);
       const expectedResult = {
         requestType: "Thumbor",
@@ -593,7 +416,7 @@ describe("setup", () => {
       }));
 
       // Act
-      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const imageRequest = new ImageRequest(s3Client);
       const imageRequestInfo = await imageRequest.setup(event);
       const expectedResult = {
         requestType: "Thumbor",
@@ -630,7 +453,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -665,7 +488,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -701,7 +524,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -737,7 +560,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -773,7 +596,7 @@ describe("setup", () => {
     }));
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: "Default",
@@ -812,7 +635,7 @@ describe("setup", () => {
       };
     });
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const imageRequestInfo = await imageRequest.setup(event);
     const expectedResult = {
       requestType: 'Default',

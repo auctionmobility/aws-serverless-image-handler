@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
+
 import S3 from "aws-sdk/clients/s3";
 import sharp from "sharp";
 
@@ -9,7 +9,7 @@ import { ImageHandler } from "../../image-handler";
 import { ImageEdits } from "../../lib";
 
 const s3Client = new S3();
-const rekognitionClient = new Rekognition();
+const imageHandler = new ImageHandler(s3Client);
 
 //jest spies
 const hasRoundCropSpy = jest.spyOn(ImageHandler.prototype as any, "hasRoundCrop");
@@ -40,7 +40,6 @@ describe("roundCrop", () => {
       `<svg viewBox="0 0 ${width} ${height}"> <ellipse cx="${leftOffset}" cy="${topOffset}" rx="${radiusX}" ry="${radiusY}" /></svg>`
     );
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.applyEdits(image, edits, false);
 
     // Assert
@@ -66,7 +65,6 @@ describe("roundCrop", () => {
     const edits: ImageEdits = { roundCrop: { top: 100, left: 100, rx: 100, ry: 100 } };
 
     // Act
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
     const result = await imageHandler.applyEdits(image, edits, false);
 
     // Assert
@@ -82,7 +80,6 @@ describe("hasRoundCrop", () => {
   it("Should return true when the edits object has roundCrop key", () => {
     // Arrange
     const edits: ImageEdits = { roundCrop: { top: 100, left: 100, rx: 100, ry: 100 } };
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
 
     // Act
     const result = imageHandler["hasRoundCrop"](edits);
@@ -94,7 +91,6 @@ describe("hasRoundCrop", () => {
   it("should return false when the edits object does not have roundCrop key", () => {
     // Arrange
     const edits: ImageEdits = { resize: { width: 50, height: 50 } };
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
 
     // Act
     const result = imageHandler["hasRoundCrop"](edits);
@@ -107,7 +103,6 @@ describe("hasRoundCrop", () => {
 describe("validRoundCropParam", () => {
   it("Should return true when the input is a number greater than 0", () => {
     // Arrange
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
 
     // Act
     const result = imageHandler["validRoundCropParam"](2);
@@ -118,7 +113,6 @@ describe("validRoundCropParam", () => {
 
   it("Should return false when the input is a number less than 0", () => {
     // Arrange
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
 
     // Act
     const result = imageHandler["validRoundCropParam"](-1);
@@ -129,7 +123,6 @@ describe("validRoundCropParam", () => {
 
   it("Should return falsey value when the input is undefined", () => {
     // Arrange
-    const imageHandler = new ImageHandler(s3Client, rekognitionClient);
 
     // Act
     const result = imageHandler["validRoundCropParam"](undefined);

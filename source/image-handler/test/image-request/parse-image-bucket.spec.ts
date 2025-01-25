@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
 import { RequestTypes, StatusCodes } from "../../lib";
-import { SecretProvider } from "../../secret-provider";
 
 describe("parseImageBucket", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
   const OLD_ENV = process.env;
 
   beforeEach(() => {
@@ -30,7 +26,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageBucket(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -46,7 +42,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket003, allowedBucket004";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -69,7 +65,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageBucket(event, RequestTypes.DEFAULT);
 
     // Assert
@@ -83,7 +79,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageBucket(event, RequestTypes.THUMBOR);
 
     // Assert
@@ -98,7 +94,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.parseImageBucket(event, RequestTypes.CUSTOM);
 
     // Assert
@@ -112,7 +108,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     // Assert
     try {
@@ -133,7 +129,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     const bucket = imageRequest.parseImageBucket(event, RequestTypes.THUMBOR);
     // Assert
@@ -146,7 +142,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, test-bucket";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     const bucket = imageRequest.parseImageBucket(event, RequestTypes.THUMBOR);
     // Assert
@@ -159,7 +155,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, test-bucket";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     const bucket = imageRequest.parseImageBucket(event, RequestTypes.THUMBOR);
     // Assert
@@ -172,7 +168,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, test-bucket";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     const bucket = imageRequest.parseImageBucket(event, RequestTypes.THUMBOR);
     // Assert
@@ -185,7 +181,7 @@ describe("parseImageBucket", () => {
     process.env.SOURCE_BUCKETS = "allowedBucket001, test-bucket";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
 
     const bucket = imageRequest.parseImageBucket(event, RequestTypes.THUMBOR);
     // Assert

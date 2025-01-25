@@ -1,22 +1,16 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import Rekognition from "aws-sdk/clients/rekognition";
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { getOptions } from "../solution-utils/get-options";
 import { isNullOrWhiteSpace } from "../solution-utils/helpers";
 import { ImageHandler } from "./image-handler";
 import { ImageRequest } from "./image-request";
 import { Headers, ImageHandlerEvent, ImageHandlerExecutionResult, RequestTypes, StatusCodes } from "./lib";
-import { SecretProvider } from "./secret-provider";
 
 const awsSdkOptions = getOptions();
-const s3Client = new S3(awsSdkOptions);
-const rekognitionClient = new Rekognition(awsSdkOptions);
-const secretsManagerClient = new SecretsManager(awsSdkOptions);
-const secretProvider = new SecretProvider(secretsManagerClient);
+const s3Client = new S3();
 
 /**
  * Image handler Lambda handler.
@@ -26,8 +20,8 @@ const secretProvider = new SecretProvider(secretsManagerClient);
 export async function handler(event: ImageHandlerEvent): Promise<ImageHandlerExecutionResult> {
   console.info("Received event:", JSON.stringify(event, null, 2));
 
-  const imageRequest = new ImageRequest(s3Client, secretProvider);
-  const imageHandler = new ImageHandler(s3Client, rekognitionClient);
+  const imageRequest = new ImageRequest(s3Client);
+  const imageHandler = new ImageHandler(s3Client);
   const isAlb = event.requestContext && Object.prototype.hasOwnProperty.call(event.requestContext, "elb");
 
   try {

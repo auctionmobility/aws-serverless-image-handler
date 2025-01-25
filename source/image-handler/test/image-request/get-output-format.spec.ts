@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
 
 import { ImageRequest } from "../../image-request";
-import { SecretProvider } from "../../secret-provider";
 
 describe("getOutputFormat", () => {
   const s3Client = new S3();
-  const secretsManager = new SecretsManager();
-  const secretProvider = new SecretProvider(secretsManager);
   const OLD_ENV = process.env;
 
   beforeEach(() => {
@@ -32,7 +28,7 @@ describe("getOutputFormat", () => {
     process.env.AUTO_WEBP = "Yes";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.getOutputFormat(event);
 
     // Assert
@@ -50,7 +46,7 @@ describe("getOutputFormat", () => {
     process.env.AUTO_WEBP = "Yes";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.getOutputFormat(event);
 
     // Assert
@@ -68,7 +64,7 @@ describe("getOutputFormat", () => {
     process.env.AUTO_WEBP = "Yes";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.getOutputFormat(event);
 
     // Assert
@@ -86,7 +82,7 @@ describe("getOutputFormat", () => {
     process.env.AUTO_WEBP = "No";
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.getOutputFormat(event);
 
     // Assert
@@ -103,7 +99,7 @@ describe("getOutputFormat", () => {
     };
 
     // Act
-    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const imageRequest = new ImageRequest(s3Client);
     const result = imageRequest.getOutputFormat(event);
 
     // Assert
